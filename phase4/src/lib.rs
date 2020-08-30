@@ -1,8 +1,8 @@
-#![feature(compiler_builtins_lib, lang_items, asm, pointer_methods)]
+#![feature(lang_items, llvm_asm)]
 #![no_builtins]
 #![no_std]
 
-extern crate compiler_builtins;
+//extern crate compiler_builtins;
 
 pub mod lang_items;
 
@@ -15,7 +15,7 @@ const GPIO_CLR0: *mut u32 = (GPIO_BASE + 0x28) as *mut u32;
 #[inline(never)]
 fn spin_sleep_ms(ms: usize) {
     for _ in 0..(ms * 6000) {
-        unsafe { asm!("nop" :::: "volatile"); }
+        unsafe { llvm_asm!("nop" :::: "volatile"); }
     }
 }
 
