@@ -18,20 +18,13 @@ impl Builder {
         self.number = Some(value);
         self
     }
-
-    fn to_string(&self) -> String {
-        if let Some(ref string) = self.string {
-            return string.clone();
-        }
-        return String::from("");
-    }
 }
 
 impl fmt::Display for Builder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut vec = Vec::<String>::new();
         if let Some(ref string) = self.string {
-            vec.push(string.to_string());
+            vec.push(string.clone());
         }
         if let Some(number) = self.number {
             vec.push(number.to_string());
