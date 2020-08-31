@@ -1,8 +1,43 @@
 // FIXME: Make me pass! Diff budget: 30 lines.
 
+use std::fmt;
+
+#[derive(Default)]
 struct Builder {
     string: Option<String>,
     number: Option<usize>,
+}
+
+impl Builder {
+    fn string<S: Into<String>>(&mut self, value: S) -> &mut Self {
+        self.string = Some(value.into());
+        self
+    }
+
+    fn number(&mut self, value: usize) -> &mut Self {
+        self.number = Some(value);
+        self
+    }
+
+    fn to_string(&self) -> String {
+        if let Some(ref string) = self.string {
+            return string.clone();
+        }
+        return String::from("");
+    }
+}
+
+impl fmt::Display for Builder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut vec = Vec::<String>::new();
+        if let Some(ref string) = self.string {
+            vec.push(string.to_string());
+        }
+        if let Some(number) = self.number {
+            vec.push(number.to_string());
+        }
+        write!(f, "{}", vec.join(" "))
+    }
 }
 
 // Do not modify this function.
