@@ -60,6 +60,25 @@ fn test_loop() {
 }
 
 #[test]
+fn test_can_packet_number() {
+    let mut input = [0u8; 128 * 25];
+    for (i, chunk) in input.chunks_mut(128).enumerate() {
+        chunk.iter_mut().for_each(|b| *b = i as u8);
+    }
+
+    let (tx, rx) = pipe();
+    let tx_thread = std::thread::spawn(move || Xmodem::transmit(&input[..], rx));
+    let rx_thread = std::thread::spawn(move || {
+        let mut output = [0u8; 128 * 25];
+        Xmodem::receive(tx, &mut output[..]).map(|_| output)
+    });
+
+    assert_eq!(tx_thread.join().expect("tx join okay").expect("tx okay"), 128 * 25);
+    let output = rx_thread.join().expect("rx join okay").expect("rx okay");
+    assert_eq!(&input[..], &output[..]);
+}
+
+#[test]
 fn read_byte() {
     let byte = Xmodem::new(Cursor::new(vec![CAN]))
         .read_byte(false)

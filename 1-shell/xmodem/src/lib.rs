@@ -173,16 +173,13 @@ impl<T: io::Read + io::Write> Xmodem<T> {
     /// byte was not `byte`, if the read byte was `CAN` and `byte` is not `CAN`,
     /// or if writing the `CAN` byte failed on byte mismatch.
     fn expect_byte_or_cancel(&mut self, byte: u8, msg: &'static str) -> io::Result<u8> {
-        let read_byte = self.read_byte(false)?;
-        if byte == read_byte {
-            return Ok(byte);
-        }
-        // Bytes differ, cancelling the communication.
-        self.write_byte(CAN)?;
-        if read_byte == CAN {
-            return Err(io::Error::new(io::ErrorKind::ConnectionAborted, "received CAN"));
-        } else {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, msg));
+        match self.expect_byte(byte, msg) {
+            Ok(n) => return Ok(n),
+            Err(e) => {
+                // Bytes differ, cancelling the communication.
+                self.write_byte(CAN)?;
+                return Err(e);
+            },
         }
     }
 
@@ -254,17 +251,9 @@ impl<T: io::Read + io::Write> Xmodem<T> {
         }
 
         println!("RX: Receiving packet {}.", self.packet);
-        let next_packet = self.read_byte(true)?;
-        if next_packet != self.packet {
-            self.write_byte(CAN)?;
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "invalid next packet number"));
-        }
-
-        let packet_complement = self.read_byte(true)?;
-        if self.packet + packet_complement != 255 {
-            self.write_byte(CAN)?;
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "packet number checksum mismatch"));
-        }
+        // Validating packet number.
+        self.expect_byte_or_cancel(self.packet, "invalid next packet number")?;
+        self.expect_byte_or_cancel(255 - self.packet, "packet number checksum mismatch")?;
 
         let mut packet_checksum = 0u8;
         for i in 0..128 {
