@@ -7,6 +7,10 @@ authors = ["Sergio Benitez <sb@sergio.bz>"]
 crate-type = ["staticlib"]
 path = "src/kmain.rs"
 
+[features]
+# qemu = ["pi/qemu"]
+no_test = ["std"]
+
 [profile.dev]
 panic = "abort"
 lto = true
@@ -22,7 +26,9 @@ panic = "abort"
 lto = true
 
 [dependencies]
-pi = { path = "../pi", features = ["std"] }
+gimli = { version = "0.16.1", default-features = false, features = ["alloc"] }
+pi = { path = "../pi" }
 
 # from assignment 1
 stack-vec = { path = "../../1-shell/stack-vec/" }
+std = { path = "../std", optional = true }

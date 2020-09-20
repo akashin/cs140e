@@ -270,7 +270,7 @@
 #![feature(linkage)]
 #![feature(needs_panic_runtime)]
 #![feature(never_type)]
-#![feature(on_unimplemented)]
+// #![feature(on_unimplemented)]
 #![feature(optin_builtin_traits)]
 #![feature(panic_internals)]
 #![feature(prelude_import)]
